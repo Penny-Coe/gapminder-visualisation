@@ -112,4 +112,44 @@ st.plotly_chart(fig_gdp, use_container_width=True)
 
 st.subheader("Global Development Over Time (Animated)")
 
+import numpy as np
+
+st.subheader("Projected Life Expectancy (Simple Trend)")
+
+selected_country = st.selectbox(
+    "Select country for projection",
+    sorted(df["country"].unique()),
+    key="projection"
+)
+
+country_df = df[df["country"] == selected_country]
+
+# Simple linear trend
+x = country_df["year"]
+y = country_df["lifeExp"]
+
+coeffs = np.polyfit(x, y, 1)
+trend = np.poly1d(coeffs)
+
+# Extend into future
+future_years = np.arange(x.min(), 2030, 1)
+future_life = trend(future_years)
+
+fig_pred = px.line(
+    x=future_years,
+    y=future_life,
+    title=f"Projected Life Expectancy Trend: {selected_country}",
+    labels={"x": "Year", "y": "Life Expectancy"}
+)
+
+# Add actual data
+fig_pred.add_scatter(
+    x=x,
+    y=y,
+    mode="markers",
+    name="Actual Data"
+)
+
+st.plotly_chart(fig_pred, use_container_width=True)
+
 
