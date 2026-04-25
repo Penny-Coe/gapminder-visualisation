@@ -7,11 +7,10 @@ df = px.data.gapminder()
 st.title("Global Health & Wealth Dashboard")
 
 # Sidebar
-year = st.sidebar.slider(
+year = st.sidebar.select_slider(
     "Select Year",
-    int(df.year.min()),
-    int(df.year.max()),
-    2007
+    options=sorted(df["year"].unique()),
+    value=2007
 )
 
 variable = st.sidebar.selectbox(
