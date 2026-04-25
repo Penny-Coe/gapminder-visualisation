@@ -64,7 +64,26 @@ fig_map = px.choropleth(
 
 st.plotly_chart(fig_map, use_container_width=True)
 
+# Zoomed map when a country is selected
+if selected_country != "All countries":
+    st.subheader(f"Focused View: {selected_country}")
 
+    country_focus_df = df[df["country"] == selected_country]
+
+    fig_focus = px.choropleth(
+        country_focus_df,
+        locations="iso_alpha",
+        color="lifeExp",
+        hover_name="country",
+        title=f"{selected_country} (Selected Year: {year})",
+    )
+
+    fig_focus.update_geos(
+        fitbounds="locations",  # <-- THIS ZOOMS IN
+        visible=False
+    )
+
+    st.plotly_chart(fig_focus, use_container_width=True)
 
 # -----------------------------
 # Health inequality hotspot map
