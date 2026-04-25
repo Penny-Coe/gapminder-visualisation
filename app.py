@@ -60,3 +60,34 @@ fig_heatmap = px.imshow(
 )
 
 st.plotly_chart(fig_heatmap, use_container_width=True)
+
+st.subheader("Country Trend Over Time")
+
+selected_country = st.selectbox(
+    "Select a country",
+    sorted(df["country"].unique())
+)
+
+country_df = df[df["country"] == selected_country]
+
+fig_life = px.line(
+    country_df,
+    x="year",
+    y="lifeExp",
+    markers=True,
+    title=f"Life Expectancy Over Time: {selected_country}",
+    labels={"lifeExp": "Life Expectancy", "year": "Year"}
+)
+
+st.plotly_chart(fig_life, use_container_width=True)
+
+fig_gdp = px.line(
+    country_df,
+    x="year",
+    y="gdpPercap",
+    markers=True,
+    title=f"GDP per Capita Over Time: {selected_country}",
+    labels={"gdpPercap": "GDP per Capita", "year": "Year"}
+)
+
+st.plotly_chart(fig_gdp, use_container_width=True)
