@@ -32,7 +32,14 @@ variable = st.sidebar.selectbox(
     ["lifeExp", "gdpPercap"]
 )
 
+selected_country = st.sidebar.selectbox(
+    "Search/select a country",
+    ["All countries"] + sorted(df["country"].unique())
+)
+
 filtered_df = df[df["year"] == year].copy()
+if selected_country != "All countries":
+    filtered_df = filtered_df[filtered_df["country"] == selected_country]
 
 # -----------------------------
 # Main choropleth map
