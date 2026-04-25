@@ -68,18 +68,21 @@ st.plotly_chart(fig_map, use_container_width=True)
 if selected_country != "All countries":
     st.subheader(f"Focused View: {selected_country}")
 
-    country_focus_df = df[df["country"] == selected_country]
+    country_focus_df = df[
+        (df["country"] == selected_country) & (df["year"] == year)
+    ]
 
     fig_focus = px.choropleth(
         country_focus_df,
         locations="iso_alpha",
-        color="lifeExp",
+        color=variable,  # <-- IMPORTANT (match main map)
         hover_name="country",
-        title=f"{selected_country} (Selected Year: {year})",
+        title=f"{selected_country} ({year})",
+        color_continuous_scale="Viridis"
     )
 
     fig_focus.update_geos(
-        fitbounds="locations",  # <-- THIS ZOOMS IN
+        fitbounds="locations",
         visible=False
     )
 
