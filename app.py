@@ -38,6 +38,7 @@ filtered_df = df[df["year"] == year].copy()
 # Main choropleth map
 # -----------------------------
 # Life Expectancy Map
+st.subheader("Global Comparison: GDP vs Life Expectancy")
 st.subheader("Global Health Outcomes (Life Expectancy)")
 fig_life_map = px.choropleth(
     filtered_df,
@@ -49,8 +50,6 @@ fig_life_map = px.choropleth(
 )
 
 st.plotly_chart(fig_life_map, use_container_width=True)
-
-st.subheader("Global Comparison: GDP vs Life Expectancy")
 
 # GDP Map
 st.subheader("Economic Context (GDP per Capita)")
