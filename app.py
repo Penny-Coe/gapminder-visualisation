@@ -33,11 +33,13 @@ variable = st.sidebar.selectbox(
 )
 
 selected_country = st.sidebar.selectbox(
-    "Select country for detailed trends",
-    sorted(df["country"].unique())
+    "Search/select a country",
+    ["All countries"] + sorted(df["country"].unique())
 )
 
 filtered_df = df[df["year"] == year].copy()
+if selected_country != "All countries":
+    filtered_df = filtered_df[filtered_df["country"] == selected_country]
 
 # -----------------------------
 # Main choropleth map
@@ -105,31 +107,6 @@ st.write(
     "Countries are grouped into priority categories based on life expectancy. "
     "This visual helps identify areas where health outcomes may require greater attention."
 )
-
-# -----------------------------
-# scatter plot
-# -----------------------------
-st.subheader("Relationship Between GDP and Life Expectancy")
-
-fig_scatter = px.scatter(
-    filtered_df,
-    x="gdpPercap",
-    y="lifeExp",
-    size="pop",
-    color="continent",
-    hover_name="country",
-    log_x=True,
-    trendline="ols",
-    title=f"GDP per Capita vs Life Expectancy in {year}",
-    labels={
-        "gdpPercap": "GDP per Capita",
-        "lifeExp": "Life Expectancy",
-        "pop": "Population",
-        "continent": "Continent"
-    }
-)
-
-st.plotly_chart(fig_scatter, use_container_width=True)
 
 # -----------------------------
 # Animated scatter plot
