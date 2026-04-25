@@ -37,9 +37,23 @@ filtered_df = df[df["year"] == year].copy()
 # -----------------------------
 # Main choropleth map
 # -----------------------------
+# Life Expectancy Map
+st.subheader("Global Health Outcomes (Life Expectancy)")
+fig_life_map = px.choropleth(
+    filtered_df,
+    locations="iso_alpha",
+    color="lifeExp",
+    hover_name="country",
+    color_continuous_scale="Viridis",
+    title=f"Life Expectancy ({year})"
+)
+
+st.plotly_chart(fig_life_map, use_container_width=True)
+
 st.subheader("Global Comparison: GDP vs Life Expectancy")
 
 # GDP Map
+st.subheader("Economic Context (GDP per Capita)")
 fig_gdp_map = px.choropleth(
     filtered_df,
     locations="iso_alpha",
@@ -51,17 +65,6 @@ fig_gdp_map = px.choropleth(
 
 st.plotly_chart(fig_gdp_map, use_container_width=True)
 
-# Life Expectancy Map
-fig_life_map = px.choropleth(
-    filtered_df,
-    locations="iso_alpha",
-    color="lifeExp",
-    hover_name="country",
-    color_continuous_scale="Viridis",
-    title=f"Life Expectancy ({year})"
-)
-
-st.plotly_chart(fig_life_map, use_container_width=True)
 
 
 # -----------------------------
