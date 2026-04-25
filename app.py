@@ -55,6 +55,17 @@ fig_map = px.choropleth(
 
 st.plotly_chart(fig_map, use_container_width=True)
 
+# Map 
+fig_map = px.choropleth( 
+    filtered_df, 
+    locations="iso_alpha", 
+    color=variable, 
+    hover_name="country", 
+    color_continuous_scale="Viridis",
+    title=f"{variable} by Country in {year}" 
+) 
+st.plotly_chart(fig_map)
+
 # -----------------------------
 # Health inequality hotspot map
 # -----------------------------
