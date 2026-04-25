@@ -45,3 +45,18 @@ fig_scatter = px.scatter(
 )
 
 st.plotly_chart(fig_scatter)
+
+# Heatmap: Average life expectancy by continent over time
+st.subheader("Life Expectancy Trends by Continent")
+
+heatmap_df = df.groupby(["continent", "year"])["lifeExp"].mean().reset_index()
+
+fig_heatmap = px.imshow(
+    heatmap_df.pivot(index="continent", columns="year", values="lifeExp"),
+    labels=dict(x="Year", y="Continent", color="Life Expectancy"),
+    title="Average Life Expectancy by Continent Over Time",
+    aspect="auto",
+    color_continuous_scale="Viridis"
+)
+
+st.plotly_chart(fig_heatmap, use_container_width=True)
