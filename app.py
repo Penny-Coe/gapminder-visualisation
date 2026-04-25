@@ -38,7 +38,6 @@ selected_country = st.sidebar.selectbox(
 )
 
 filtered_df = df[df["year"] == year].copy()
-if selected_country != "All countries":
 
 # -----------------------------
 # Main choropleth map
@@ -108,7 +107,7 @@ st.write(
 )
 
 # -----------------------------
-scatter plot
+# scatter plot
 # -----------------------------
 st.subheader("Relationship Between GDP and Life Expectancy")
 
