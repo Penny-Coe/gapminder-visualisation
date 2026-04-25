@@ -36,35 +36,34 @@ filtered_df = df[df["year"] == year].copy()
 # -----------------------------
 # Main choropleth map
 # -----------------------------
-st.subheader("Global Map")
+t.subheader("Global Comparison: GDP vs Life Expectancy")
 
-fig_map = px.choropleth(
-    filtered_df,
-    locations="iso_alpha",
-    color=variable,
-    hover_name="country",
-    hover_data={
-        "lifeExp": ":.1f",
-        "gdpPercap": ":,.0f",
-        "pop": ":,",
-        "iso_alpha": False
-    },
-    color_continuous_scale="Viridis",
-    title=f"{variable} by Country in {year}"
-)
+col1, col2 = st.columns(2)
 
-st.plotly_chart(fig_map, use_container_width=True)
+# GDP Map
+with col1:
+    fig_gdp_map = px.choropleth(
+        filtered_df,
+        locations="iso_alpha",
+        color="gdpPercap",
+        hover_name="country",
+        color_continuous_scale="Blues",
+        title=f"GDP per Capita ({year})"
+    )
+    st.plotly_chart(fig_gdp_map, use_container_width=True)
 
-# Map 
-fig_map = px.choropleth( 
-    filtered_df, 
-    locations="iso_alpha", 
-    color=variable, 
-    hover_name="country", 
-    color_continuous_scale="Viridis",
-    title=f"{variable} by Country in {year}" 
-) 
-st.plotly_chart(fig_map)
+# Life Expectancy Map
+with col2:
+    fig_life_map = px.choropleth(
+        filtered_df,
+        locations="iso_alpha",
+        color="lifeExp",
+        hover_name="country",
+        color_continuous_scale="Viridis",
+        title=f"Life Expectancy ({year})"
+    )
+    st.plotly_chart(fig_life_map, use_container_width=True)
+
 
 # -----------------------------
 # Health inequality hotspot map
