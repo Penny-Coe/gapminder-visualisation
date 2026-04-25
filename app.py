@@ -91,3 +91,21 @@ fig_gdp = px.line(
 )
 
 st.plotly_chart(fig_gdp, use_container_width=True)
+
+st.subheader("Global Development Over Time (Animated)")
+
+fig_anim = px.scatter(
+    df,
+    x="gdpPercap",
+    y="lifeExp",
+    size="pop",
+    color="continent",
+    hover_name="country",
+    log_x=True,
+    size_max=60,
+    animation_frame="year",
+    animation_group="country",
+    title="GDP vs Life Expectancy Over Time"
+)
+
+st.plotly_chart(fig_anim, use_container_width=True)
