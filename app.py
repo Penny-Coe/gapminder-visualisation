@@ -20,6 +20,7 @@ st.write(
 # -----------------------------
 # Sidebar controls
 # -----------------------------
+
 year = st.sidebar.select_slider(
     "Select Year",
     options=sorted(df["year"].unique()),
@@ -36,7 +37,7 @@ filtered_df = df[df["year"] == year].copy()
 # -----------------------------
 # Main choropleth map
 # -----------------------------
-t.subheader("Global Comparison: GDP vs Life Expectancy")
+st.subheader("Global Comparison: GDP vs Life Expectancy")
 
 col1, col2 = st.columns(2)
 
