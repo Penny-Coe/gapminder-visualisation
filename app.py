@@ -54,6 +54,20 @@ with tab1:
     )
 
     # -----------------------------
+# KPI summary cards
+# -----------------------------
+
+avg_life = filtered_df["lifeExp"].mean()
+avg_gdp = filtered_df["gdpPercap"].mean()
+total_pop = filtered_df["pop"].sum()
+
+kpi1, kpi2, kpi3 = st.columns(3)
+
+kpi1.metric("Average Life Expectancy", f"{avg_life:.1f} years")
+kpi2.metric("Average GDP per Capita", f"${avg_gdp:,.0f}")
+kpi3.metric("Total Population", f"{total_pop:,.0f}")
+
+    # -----------------------------
     # Controls for the global map
     # These controls sit close to the visual they affect
     # -----------------------------
@@ -168,6 +182,74 @@ with tab1:
     )
 
     st.plotly_chart(fig_hotspot, use_container_width=True)
+
+# -----------------------------
+# Top / Bottom 10 countries bar chart
+# -----------------------------
+st.subheader("Top and Bottom 10 Countries")
+
+ranking_variable = st.selectbox(
+    "Select variable for ranking",
+    ["lifeExp", "gdpPercap", "pop"],
+    key="ranking_variable"
+)
+
+ranking_df = df[df["year"] == year].copy()
+
+top_10 = ranking_df.nlargest(10, ranking_variable)
+bottom_10 = ranking_df.nsmallest(10, ranking_variable)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    fig_top = px.bar(
+        top_10.sort_values(ranking_variable),
+        x=ranking_variable,
+        y="country",
+        orientation="h",
+        title=f"Top 10 Countries by {ranking_variable} in {year}",
+        hover_data={
+            "lifeExp": ":.1f",
+            "gdpPercap": ":,.0f",
+            "pop": ":,",
+            "continent": True
+        },
+        labels={
+            "country": "Country",
+            "lifeExp": "Life Expectancy",
+            "gdpPercap": "GDP per Capita",
+            "pop": "Population"
+        }
+    )
+
+    fig_top.update_layout(height=500)
+    st.plotly_chart(fig_top, use_container_width=True)
+
+with col2:
+    fig_bottom = px.bar(
+        bottom_10.sort_values(ranking_variable, ascending=False),
+        x=ranking_variable,
+        y="country",
+        orientation="h",
+        title=f"Bottom 10 Countries by {ranking_variable} in {year}",
+        hover_data={
+            "lifeExp": ":.1f",
+            "gdpPercap": ":,.0f",
+            "pop": ":,",
+            "continent": True
+        },
+        labels={
+            "country": "Country",
+            "lifeExp": "Life Expectancy",
+            "gdpPercap": "GDP per Capita",
+            "pop": "Population"
+        }
+    )
+
+    fig_bottom.update_layout(height=500)
+    st.plotly_chart(fig_bottom, use_container_width=True)
+
+
 
 
 # ============================================================
