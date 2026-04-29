@@ -35,7 +35,7 @@ st.write(
 tab1, tab2, tab3 = st.tabs([
     "Global Maps",
     "Trends Over Time",
-    "Projection"
+    "Projection",
      "Country Rankings"
 ])
 
