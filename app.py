@@ -36,7 +36,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "Global Maps",
     "Trends Over Time",
     "Projection",
-     "Country Rankings"
+    "Country Rankings"
 ])
 
 # ============================================================
@@ -53,7 +53,7 @@ with tab1:
     # -----------------------------
     # Controls for global maps
     # -----------------------------
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         year = st.select_slider(
@@ -69,6 +69,12 @@ with tab1:
         )
 
     with col3:
+        continent_filter = st.selectbox(
+            "Select continent",
+            ["All continents"] + sorted(df["continent"].unique())
+        )
+
+    with col4:
         selected_country = st.selectbox(
             "Search/select a country",
             ["All countries"] + sorted(df["country"].unique())
@@ -78,6 +84,9 @@ with tab1:
     # Filter data
     # -----------------------------
     filtered_df = df[df["year"] == year].copy()
+
+    if continent_filter != "All continents":
+        filtered_df = filtered_df[filtered_df["continent"] == continent_filter]
 
     if selected_country != "All countries":
         filtered_df = filtered_df[filtered_df["country"] == selected_country]
@@ -95,6 +104,8 @@ with tab1:
     kpi2.metric("Average GDP per Capita", f"${avg_gdp:,.0f}")
     kpi3.metric("Total Population", f"{total_pop:,.0f}")
 
+    st.markdown("---")
+
     # -----------------------------
     # Main choropleth map
     # -----------------------------
@@ -109,10 +120,16 @@ with tab1:
             "lifeExp": ":.1f",
             "gdpPercap": ":,.0f",
             "pop": ":,",
+            "continent": True,
             "iso_alpha": False
         },
         color_continuous_scale="Viridis",
-        title=f"{variable} by Country in {year}"
+        title=f"{variable} by Country in {year}",
+        labels={
+            "lifeExp": "Life Expectancy",
+            "gdpPercap": "GDP per Capita",
+            "pop": "Population"
+        }
     )
 
     fig_map.update_layout(
@@ -122,15 +139,17 @@ with tab1:
 
     st.plotly_chart(fig_map, use_container_width=True)
 
+    st.info(
+        "This map helps identify broad global inequalities in health and economic development. "
+        "Darker areas indicate higher values for the selected variable."
+    )
+
+    st.markdown("---")
+
     # -----------------------------
     # Health inequality hotspot map
     # -----------------------------
     st.subheader("Health Inequality Hotspot Map")
-
-    st.write(
-        "This map groups countries into priority categories based on life expectancy. "
-        "It helps identify countries where health outcomes may require greater attention."
-    )
 
     def classify_health_hotspot(life_exp):
         if life_exp < 60:
@@ -153,6 +172,7 @@ with tab1:
             "lifeExp": ":.1f",
             "gdpPercap": ":,.0f",
             "pop": ":,",
+            "continent": True,
             "Health Hotspot Category": True,
             "iso_alpha": False
         },
@@ -163,6 +183,11 @@ with tab1:
                 "Moderate priority: life expectancy 60–69",
                 "Lower priority: life expectancy 70+"
             ]
+        },
+        labels={
+            "lifeExp": "Life Expectancy",
+            "gdpPercap": "GDP per Capita",
+            "pop": "Population"
         }
     )
 
@@ -172,6 +197,11 @@ with tab1:
     )
 
     st.plotly_chart(fig_hotspot, use_container_width=True)
+
+    st.info(
+        "Countries with life expectancy below 60 are classified as high priority. "
+        "This gives a simple way to highlight health inequality hotspots."
+    )
 
 
 # ============================================================
@@ -219,6 +249,66 @@ with tab2:
 
     st.plotly_chart(fig_anim, use_container_width=True)
 
+    st.info(
+        "This animated chart shows how countries have generally moved towards higher GDP per capita "
+        "and higher life expectancy over time."
+    )
+
+    st.markdown("---")
+
+    # -----------------------------
+    # Correlation section
+    # -----------------------------
+    st.subheader("Relationship Between Wealth and Health")
+
+    correlation_year = st.select_slider(
+        "Select year for correlation analysis",
+        options=sorted(df["year"].unique()),
+        value=2007,
+        key="correlation_year"
+    )
+
+    corr_df = df[df["year"] == correlation_year].copy()
+
+    fig_corr = px.scatter(
+        corr_df,
+        x="gdpPercap",
+        y="lifeExp",
+        size="pop",
+        color="continent",
+        hover_name="country",
+        log_x=True,
+        size_max=55,
+        title=f"GDP per Capita vs Life Expectancy in {correlation_year}",
+        labels={
+            "gdpPercap": "GDP per Capita",
+            "lifeExp": "Life Expectancy",
+            "pop": "Population",
+            "continent": "Continent"
+        }
+    )
+
+    fig_corr.update_layout(
+        height=600,
+        margin=dict(l=0, r=0, t=50, b=0)
+    )
+
+    st.plotly_chart(fig_corr, use_container_width=True)
+
+    correlation = corr_df["gdpPercap"].corr(corr_df["lifeExp"])
+
+    st.metric(
+        "Correlation between GDP per capita and life expectancy",
+        f"{correlation:.2f}"
+    )
+
+    st.info(
+        "A positive correlation suggests that countries with higher GDP per capita often have higher life expectancy. "
+        "However, the relationship is not perfect because health outcomes are also affected by healthcare systems, inequality, conflict, policy and other social factors."
+    )
+
+    st.markdown("---")
+
     # -----------------------------
     # Heatmap
     # -----------------------------
@@ -248,6 +338,8 @@ with tab2:
     )
 
     st.plotly_chart(fig_heatmap, use_container_width=True)
+
+    st.markdown("---")
 
     # -----------------------------
     # Country trend section
@@ -357,6 +449,12 @@ with tab3:
         value=f"{projected_2030:.1f} years"
     )
 
+    st.caption(
+        "This projection uses a simple linear model. It does not account for unexpected events, "
+        "policy changes, conflict, pandemics, healthcare improvements or economic shocks."
+    )
+
+
 # ============================================================
 # TAB 4: COUNTRY RANKINGS
 # ============================================================
@@ -389,19 +487,13 @@ with tab4:
             key="ranking_variable"
         )
 
-    # -----------------------------
-    # Filter data for selected year
-    # -----------------------------
     ranking_df = df[df["year"] == ranking_year].copy()
 
-    # -----------------------------
-    # Create top and bottom 10 datasets
-    # -----------------------------
     top_10 = ranking_df.nlargest(10, ranking_variable)
     bottom_10 = ranking_df.nsmallest(10, ranking_variable)
 
     # -----------------------------
-    # Display top and bottom 10 side by side
+    # Top and bottom 10 charts
     # -----------------------------
     col1, col2 = st.columns(2)
 
@@ -453,8 +545,15 @@ with tab4:
         fig_bottom.update_layout(height=550)
         st.plotly_chart(fig_bottom, use_container_width=True)
 
+    st.info(
+        "The ranking charts allow quick comparison of countries at the top and bottom of the selected measure. "
+        "Moving the year slider shows how rankings change across the dataset."
+    )
+
+    st.markdown("---")
+
     # -----------------------------
-    # Ranking table
+    # Full ranking table
     # -----------------------------
     st.subheader("Full Ranking Table")
 
@@ -469,4 +568,14 @@ with tab4:
     st.dataframe(
         ranking_table,
         use_container_width=True
+    )
+
+    # -----------------------------
+    # Download button
+    # -----------------------------
+    st.download_button(
+        label="Download ranking table as CSV",
+        data=ranking_table.to_csv(index=True),
+        file_name=f"country_rankings_{ranking_variable}_{ranking_year}.csv",
+        mime="text/csv"
     )
