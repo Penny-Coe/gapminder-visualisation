@@ -54,20 +54,6 @@ with tab1:
     )
 
     # -----------------------------
-# KPI summary cards
-# -----------------------------
-
-avg_life = filtered_df["lifeExp"].mean()
-avg_gdp = filtered_df["gdpPercap"].mean()
-total_pop = filtered_df["pop"].sum()
-
-kpi1, kpi2, kpi3 = st.columns(3)
-
-kpi1.metric("Average Life Expectancy", f"{avg_life:.1f} years")
-kpi2.metric("Average GDP per Capita", f"${avg_gdp:,.0f}")
-kpi3.metric("Total Population", f"{total_pop:,.0f}")
-
-    # -----------------------------
     # Controls for the global map
     # These controls sit close to the visual they affect
     # -----------------------------
@@ -99,6 +85,20 @@ kpi3.metric("Total Population", f"{total_pop:,.0f}")
 
     if selected_country != "All countries":
         filtered_df = filtered_df[filtered_df["country"] == selected_country]
+
+# -----------------------------
+# KPI summary cards
+# -----------------------------
+
+avg_life = filtered_df["lifeExp"].mean()
+avg_gdp = filtered_df["gdpPercap"].mean()
+total_pop = filtered_df["pop"].sum()
+
+kpi1, kpi2, kpi3 = st.columns(3)
+
+kpi1.metric("Average Life Expectancy", f"{avg_life:.1f} years")
+kpi2.metric("Average GDP per Capita", f"${avg_gdp:,.0f}")
+kpi3.metric("Total Population", f"{total_pop:,.0f}")
 
     # -----------------------------
     # Choropleth map
