@@ -36,6 +36,7 @@ tab1, tab2, tab3 = st.tabs([
     "Global Maps",
     "Trends Over Time",
     "Projection"
+     "Country Rankings"
 ])
 
 # ============================================================
@@ -171,72 +172,6 @@ with tab1:
     )
 
     st.plotly_chart(fig_hotspot, use_container_width=True)
-
-    # -----------------------------
-    # Top / Bottom 10 countries bar chart
-    # -----------------------------
-    st.subheader("Top and Bottom 10 Countries")
-
-    ranking_variable = st.selectbox(
-        "Select variable for ranking",
-        ["lifeExp", "gdpPercap", "pop"],
-        key="ranking_variable"
-    )
-
-    ranking_df = df[df["year"] == year].copy()
-
-    top_10 = ranking_df.nlargest(10, ranking_variable)
-    bottom_10 = ranking_df.nsmallest(10, ranking_variable)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        fig_top = px.bar(
-            top_10.sort_values(ranking_variable),
-            x=ranking_variable,
-            y="country",
-            orientation="h",
-            title=f"Top 10 Countries by {ranking_variable} in {year}",
-            hover_data={
-                "lifeExp": ":.1f",
-                "gdpPercap": ":,.0f",
-                "pop": ":,",
-                "continent": True
-            },
-            labels={
-                "country": "Country",
-                "lifeExp": "Life Expectancy",
-                "gdpPercap": "GDP per Capita",
-                "pop": "Population"
-            }
-        )
-
-        fig_top.update_layout(height=500)
-        st.plotly_chart(fig_top, use_container_width=True)
-
-    with col2:
-        fig_bottom = px.bar(
-            bottom_10.sort_values(ranking_variable, ascending=False),
-            x=ranking_variable,
-            y="country",
-            orientation="h",
-            title=f"Bottom 10 Countries by {ranking_variable} in {year}",
-            hover_data={
-                "lifeExp": ":.1f",
-                "gdpPercap": ":,.0f",
-                "pop": ":,",
-                "continent": True
-            },
-            labels={
-                "country": "Country",
-                "lifeExp": "Life Expectancy",
-                "gdpPercap": "GDP per Capita",
-                "pop": "Population"
-            }
-        )
-
-        fig_bottom.update_layout(height=500)
-        st.plotly_chart(fig_bottom, use_container_width=True)
 
 
 # ============================================================
@@ -420,4 +355,118 @@ with tab3:
     st.metric(
         label=f"Projected life expectancy in 2030 for {selected_projection_country}",
         value=f"{projected_2030:.1f} years"
+    )
+
+# ============================================================
+# TAB 4: COUNTRY RANKINGS
+# ============================================================
+with tab4:
+
+    st.header("Country Rankings")
+
+    st.write(
+        "This section ranks countries by life expectancy, GDP per capita or population. "
+        "Use the year slider to see how the rankings change over time."
+    )
+
+    # -----------------------------
+    # Ranking controls
+    # -----------------------------
+    col1, col2 = st.columns(2)
+
+    with col1:
+        ranking_year = st.select_slider(
+            "Select year for ranking",
+            options=sorted(df["year"].unique()),
+            value=2007,
+            key="ranking_year"
+        )
+
+    with col2:
+        ranking_variable = st.selectbox(
+            "Select variable for ranking",
+            ["lifeExp", "gdpPercap", "pop"],
+            key="ranking_variable"
+        )
+
+    # -----------------------------
+    # Filter data for selected year
+    # -----------------------------
+    ranking_df = df[df["year"] == ranking_year].copy()
+
+    # -----------------------------
+    # Create top and bottom 10 datasets
+    # -----------------------------
+    top_10 = ranking_df.nlargest(10, ranking_variable)
+    bottom_10 = ranking_df.nsmallest(10, ranking_variable)
+
+    # -----------------------------
+    # Display top and bottom 10 side by side
+    # -----------------------------
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig_top = px.bar(
+            top_10.sort_values(ranking_variable),
+            x=ranking_variable,
+            y="country",
+            orientation="h",
+            title=f"Top 10 Countries by {ranking_variable} in {ranking_year}",
+            hover_data={
+                "lifeExp": ":.1f",
+                "gdpPercap": ":,.0f",
+                "pop": ":,",
+                "continent": True
+            },
+            labels={
+                "country": "Country",
+                "lifeExp": "Life Expectancy",
+                "gdpPercap": "GDP per Capita",
+                "pop": "Population"
+            }
+        )
+
+        fig_top.update_layout(height=550)
+        st.plotly_chart(fig_top, use_container_width=True)
+
+    with col2:
+        fig_bottom = px.bar(
+            bottom_10.sort_values(ranking_variable, ascending=False),
+            x=ranking_variable,
+            y="country",
+            orientation="h",
+            title=f"Bottom 10 Countries by {ranking_variable} in {ranking_year}",
+            hover_data={
+                "lifeExp": ":.1f",
+                "gdpPercap": ":,.0f",
+                "pop": ":,",
+                "continent": True
+            },
+            labels={
+                "country": "Country",
+                "lifeExp": "Life Expectancy",
+                "gdpPercap": "GDP per Capita",
+                "pop": "Population"
+            }
+        )
+
+        fig_bottom.update_layout(height=550)
+        st.plotly_chart(fig_bottom, use_container_width=True)
+
+    # -----------------------------
+    # Ranking table
+    # -----------------------------
+    st.subheader("Full Ranking Table")
+
+    ranking_table = ranking_df.sort_values(
+        ranking_variable,
+        ascending=False
+    )[["country", "continent", "year", "lifeExp", "gdpPercap", "pop"]]
+
+    ranking_table = ranking_table.reset_index(drop=True)
+    ranking_table.index = ranking_table.index + 1
+
+    st.dataframe(
+        ranking_table,
+        use_container_width=True
     )
