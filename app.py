@@ -32,7 +32,7 @@ st.write(
 # -----------------------------
 # Create dashboard tabs
 # -----------------------------
-tab1, tab2, tab3 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "Global Maps",
     "Trends Over Time",
     "Projection",
