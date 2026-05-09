@@ -229,7 +229,31 @@ with tab3:
         "The scatter plot and correlation value show whether higher GDP per capita is associated with higher life expectancy."
     )
 
+st.markdown("---")
 
+st.subheader("Correlation Matrix")
+
+corr_matrix = rel_df[["lifeExp", "gdpPercap", "pop"]].corr()
+
+fig_matrix = px.imshow(
+    corr_matrix,
+    text_auto=True,
+    title=f"Correlation Matrix in {relationship_year}",
+    color_continuous_scale="Viridis",
+    labels=dict(color="Correlation")
+)
+
+fig_matrix.update_layout(
+    height=500,
+    margin=dict(l=0, r=0, t=50, b=0)
+)
+
+st.plotly_chart(fig_matrix, use_container_width=True)
+
+st.info(
+    "This matrix quantifies the strength of relationships between life expectancy, "
+    "GDP per capita and population. Values closer to 1 indicate stronger positive relationships."
+)
 # ============================================================
 # TAB 4: REGIONAL AND COUNTRY DIFFERENCES
 # ============================================================
