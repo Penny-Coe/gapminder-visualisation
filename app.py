@@ -1,37 +1,29 @@
-# -----------------------------
+
 # Import libraries
-# -----------------------------
 import streamlit as st
 import plotly.express as px
 import numpy as np
 
-# -----------------------------
-# Page configuration
-# -----------------------------
+# Dashboard layout and title
 st.set_page_config(
     page_title="Global Health & Wealth Dashboard",
     layout="wide"
 )
 
-# -----------------------------
 # Load data
-# -----------------------------
 df = px.data.gapminder()
 
-# -----------------------------
 # Dashboard title and introduction
-# -----------------------------
 st.title("Global Health & Wealth Dashboard")
 
+# Short introduction explaining the visual narrative and purpose of the dashboard
 st.write(
     "This dashboard follows the same visual narrative as the report: identifying global health inequality, "
     "comparing economic inequality, exploring the relationship between wealth and health, examining regional "
     "and country-level differences, and showing how patterns change over time."
 )
 
-# -----------------------------
 # Create story-based tabs
-# -----------------------------
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "1. Health Inequality",
     "2. Economic Inequality",
@@ -41,22 +33,24 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "6. Explore & Export"
 ])
 
-# ============================================================
+#-----------------------------------------
 # TAB 1: HEALTH INEQUALITY
-# ============================================================
+#----------------------------------------------
 with tab1:
 
     st.header("1. Where are health inequalities visible globally?")
 
+# Year selection slider Allows users to explore different years in the dataset
     year = st.select_slider(
         "Select year",
         options=sorted(df["year"].unique()),
         value=2007,
         key="health_year"
     )
-
+# Filter dataset for selected year
     health_df = df[df["year"] == year].copy()
 
+ # Create world map showing life expectancy by country    
     fig_life_map = px.choropleth(
         health_df,
         locations="iso_alpha",
@@ -77,7 +71,8 @@ with tab1:
             "pop": "Population"
         }
     )
-
+    
+    # Improve layout and spacing
     fig_life_map.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
     st.plotly_chart(fig_life_map, use_container_width=True)
 
@@ -85,6 +80,8 @@ with tab1:
         "This map highlights global differences in life expectancy, helping identify regions with poorer health outcomes."
     )
 
+
+# create second map for bucket analysis
     st.subheader("Health Inequality Hotspots")
 
     def classify_health_hotspot(life_exp):
@@ -124,13 +121,17 @@ with tab1:
     st.plotly_chart(fig_hotspot, use_container_width=True)
 
 
-# ============================================================
+# ------------------------------------------------------------------
 # TAB 2: ECONOMIC INEQUALITY
-# ============================================================
+#------------------------------------------------------------------------
+
+# This section explores global economic inequality and compares GDP patterns with life expectancy patterns
+
 with tab2:
 
     st.header("2. Are economic inequalities visible in the same places?")
-
+    
+# Year selection slider
     year = st.select_slider(
         "Select year",
         options=sorted(df["year"].unique()),
@@ -140,6 +141,7 @@ with tab2:
 
     econ_df = df[df["year"] == year].copy()
 
+# GDP choropleth map
     fig_gdp_map = px.choropleth(
         econ_df,
         locations="iso_alpha",
@@ -161,7 +163,9 @@ with tab2:
         }
     )
 
+  # Improve layout and spacing
     fig_gdp_map.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
+ # Display interactive map
     st.plotly_chart(fig_gdp_map, use_container_width=True)
 
     st.info(
@@ -169,22 +173,25 @@ with tab2:
     )
 
 
-# ============================================================
+# ------------------------------------------------------------
 # TAB 3: WEALTH AND HEALTH RELATIONSHIP
-# ============================================================
+# -------------------------------------------------------------
 with tab3:
 
     st.header("3. Is there a relationship between wealth and health?")
 
+# Year selection slider
     relationship_year = st.select_slider(
         "Select year",
         options=sorted(df["year"].unique()),
         value=2007,
         key="relationship_year"
     )
-
+    
+ # Filter dataset for selected year
     rel_df = df[df["year"] == relationship_year].copy()
 
+# scatter plot
     fig_scatter = px.scatter(
         rel_df,
         x="gdpPercap",
@@ -205,6 +212,7 @@ with tab3:
         }
     )
 
+ # Use logarithmic x-axis to reduce skewness and improve interpretability
     fig_scatter.update_xaxes(
         type="log",
         tickvals=[1000, 5000, 10000, 50000, 100000],
@@ -212,12 +220,14 @@ with tab3:
         title="GDP per Capita (log scale)"
     )
 
+# Improve readability of plot
     fig_scatter.update_yaxes(title="Life Expectancy")
     fig_scatter.update_traces(opacity=0.7, marker=dict(sizemin=6))
     fig_scatter.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
 
     st.plotly_chart(fig_scatter, use_container_width=True)
 
+# Correlation coefficient
     correlation = rel_df["gdpPercap"].corr(rel_df["lifeExp"])
 
     st.metric(
@@ -231,6 +241,7 @@ with tab3:
 
 st.markdown("---")
 
+# Correlation matrix
 st.subheader("Correlation Matrix")
 
 corr_matrix = rel_df[["lifeExp", "gdpPercap", "pop"]].corr()
@@ -254,25 +265,31 @@ st.info(
     "This matrix quantifies the strength of relationships between life expectancy, "
     "GDP per capita and population. Values closer to 1 indicate stronger positive relationships."
 )
-# ============================================================
+
+# ------------------------------------------------------------
 # TAB 4: REGIONAL AND COUNTRY DIFFERENCES
-# ============================================================
+# ----------------------------------------------------------
 with tab4:
 
     st.header("4. Is the relationship the same across regions and countries?")
 
+# Year selection slider    
     region_year = st.select_slider(
         "Select year",
         options=sorted(df["year"].unique()),
         value=2007,
         key="region_year"
     )
-
+    
+# Filter dataset for selected year
     region_df = df[df["year"] == region_year].copy()
+# Log-transform GDP to reduce skewness for clearer boxplot comparison   
     region_df["log_gdpPercap"] = np.log(region_df["gdpPercap"])
 
+# Regional boxplots
     st.subheader("Regional Differences")
-
+    
+# Boxplot comparing life expectancy across continents
     fig_box_life = px.box(
         region_df,
         x="continent",
@@ -297,17 +314,21 @@ with tab4:
     fig_box_gdp.update_layout(height=500, showlegend=False)
     st.plotly_chart(fig_box_gdp, use_container_width=True)
 
+# Country-level rankings
     st.subheader("Country-Level Rankings")
-
+    
+# Allows users to choose which variable to rank countries by
     ranking_variable = st.selectbox(
         "Select ranking variable",
         ["lifeExp", "gdpPercap", "pop"],
         key="ranking_variable_story"
     )
-
+    
+ # Identify highest and lowest ranking countries
     top_10 = region_df.nlargest(10, ranking_variable)
     bottom_10 = region_df.nsmallest(10, ranking_variable)
-
+    
+# Display top and bottom rankings side by side
     col1, col2 = st.columns(2)
 
     with col1:
@@ -334,14 +355,15 @@ with tab4:
         fig_bottom.update_layout(height=500)
         st.plotly_chart(fig_bottom, use_container_width=True)
 
-
-# ============================================================
+# ----------------------------------------------------------------
 # TAB 5: CHANGE OVER TIME
-# ============================================================
+# ------------------------------------------------------------------
 with tab5:
 
     st.header("5. How have these patterns changed over time?")
 
+
+    # Animated scatter plot Shows how countries move over time in relation to GDP, life expectancy and population size
     st.subheader("Animated Scatter Plot")
 
     fig_anim = px.scatter(
@@ -364,12 +386,14 @@ with tab5:
         }
     )
 
+# Improve bubble visibility and keep y-axis consistent across frames
     fig_anim.update_traces(marker=dict(sizemin=6), opacity=0.7)
     fig_anim.update_yaxes(range=[20, 90])
     fig_anim.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
 
     st.plotly_chart(fig_anim, use_container_width=True)
 
+# Life expectancy heatmap, Calculates average life expectancy by continent and year  
     st.subheader("Average Life Expectancy by Continent Over Time")
 
     life_heatmap_df = df.groupby(["continent", "year"])["lifeExp"].mean().reset_index()
@@ -386,6 +410,7 @@ with tab5:
     fig_life_heatmap.update_layout(height=500)
     st.plotly_chart(fig_life_heatmap, use_container_width=True)
 
+# Individual country trends    
     st.subheader("Country Trends")
 
     selected_country = st.selectbox(
@@ -393,9 +418,11 @@ with tab5:
         sorted(df["country"].unique()),
         key="country_trend_story"
     )
-
+    
+# Filter data for selected country
     country_df = df[df["country"] == selected_country].copy()
-
+    
+# Display life expectancy and GDP trends side by side
     col1, col2 = st.columns(2)
 
     with col1:
@@ -421,9 +448,9 @@ with tab5:
         st.plotly_chart(fig_gdp_trend, use_container_width=True)
 
 
-# ============================================================
+# --------------------------------------------------------------
 # TAB 6: EXPLORE AND EXPORT
-# ============================================================
+# -------------------------------------------------------------
 with tab6:
 
     st.header("6. Explore and Export Data")
@@ -431,7 +458,8 @@ with tab6:
     st.write(
         "Use this section to explore the dataset directly and export selected rankings."
     )
-
+    
+# Export controls
     export_year = st.select_slider(
         "Select year",
         options=sorted(df["year"].unique()),
@@ -445,18 +473,23 @@ with tab6:
         key="export_variable"
     )
 
+# Filter dataset for selected year
     export_df = df[df["year"] == export_year].copy()
 
+# Ranking table. Sort countries by selected variable in descending order
     ranking_table = export_df.sort_values(
         export_variable,
         ascending=False
     )[["country", "continent", "year", "lifeExp", "gdpPercap", "pop"]]
 
+ # Reset index so rankings start at 1 instead of 0 
     ranking_table = ranking_table.reset_index(drop=True)
     ranking_table.index = ranking_table.index + 1
 
+# Display ranking table in dashboard
     st.dataframe(ranking_table, use_container_width=True)
 
+ # Download option - Allows users to download the ranking table as a CSV file
     st.download_button(
         label="Download ranking table as CSV",
         data=ranking_table.to_csv(index=True),
