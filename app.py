@@ -24,97 +24,43 @@ df = px.data.gapminder()
 st.title("Global Health & Wealth Dashboard")
 
 st.write(
-    "This dashboard explores global inequalities in health and economic development "
-    "using the Gapminder dataset. It allows users to compare life expectancy, GDP per capita, "
-    "population patterns and projected health trends across countries and continents."
+    "This dashboard follows the same visual narrative as the report: identifying global health inequality, "
+    "comparing economic inequality, exploring the relationship between wealth and health, examining regional "
+    "and country-level differences, and showing how patterns change over time."
 )
 
 # -----------------------------
-# Create dashboard tabs
+# Create story-based tabs
 # -----------------------------
-tab1, tab2, tab3, tab4 = st.tabs([
-    "Global Maps",
-    "Trends Over Time",
-    "Projection",
-    "Country Rankings"
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    "1. Health Inequality",
+    "2. Economic Inequality",
+    "3. Wealth & Health",
+    "4. Regional & Country Differences",
+    "5. Change Over Time",
+    "6. Explore & Export"
 ])
 
 # ============================================================
-# TAB 1: GLOBAL MAPS
+# TAB 1: HEALTH INEQUALITY
 # ============================================================
 with tab1:
 
-    st.header("Global Overview")
+    st.header("1. Where are health inequalities visible globally?")
 
-    st.write(
-        "Use the controls below to explore global patterns in life expectancy and GDP per capita."
+    year = st.select_slider(
+        "Select year",
+        options=sorted(df["year"].unique()),
+        value=2007,
+        key="health_year"
     )
 
-    # -----------------------------
-    # Controls for global maps
-    # -----------------------------
-    col1, col2, col3, col4 = st.columns(4)
+    health_df = df[df["year"] == year].copy()
 
-    with col1:
-        year = st.select_slider(
-            "Select year",
-            options=sorted(df["year"].unique()),
-            value=2007
-        )
-
-    with col2:
-        variable = st.selectbox(
-            "Select variable for map",
-            ["lifeExp", "gdpPercap"]
-        )
-
-    with col3:
-        continent_filter = st.selectbox(
-            "Select continent",
-            ["All continents"] + sorted(df["continent"].unique())
-        )
-
-    with col4:
-        selected_country = st.selectbox(
-            "Search/select a country",
-            ["All countries"] + sorted(df["country"].unique())
-        )
-
-    # -----------------------------
-    # Filter data
-    # -----------------------------
-    filtered_df = df[df["year"] == year].copy()
-
-    if continent_filter != "All continents":
-        filtered_df = filtered_df[filtered_df["continent"] == continent_filter]
-
-    if selected_country != "All countries":
-        filtered_df = filtered_df[filtered_df["country"] == selected_country]
-
-    # -----------------------------
-    # KPI summary cards
-    # -----------------------------
-    avg_life = filtered_df["lifeExp"].mean()
-    avg_gdp = filtered_df["gdpPercap"].mean()
-    total_pop = filtered_df["pop"].sum()
-
-    kpi1, kpi2, kpi3 = st.columns(3)
-
-    kpi1.metric("Average Life Expectancy", f"{avg_life:.1f} years")
-    kpi2.metric("Average GDP per Capita", f"${avg_gdp:,.0f}")
-    kpi3.metric("Total Population", f"{total_pop:,.0f}")
-
-    st.markdown("---")
-
-    # -----------------------------
-    # Main choropleth map
-    # -----------------------------
-    st.subheader("Global Overview Map")
-
-    fig_map = px.choropleth(
-        filtered_df,
+    fig_life_map = px.choropleth(
+        health_df,
         locations="iso_alpha",
-        color=variable,
+        color="lifeExp",
         hover_name="country",
         hover_data={
             "lifeExp": ":.1f",
@@ -124,7 +70,7 @@ with tab1:
             "iso_alpha": False
         },
         color_continuous_scale="Viridis",
-        title=f"{variable} by Country in {year}",
+        title=f"Global Life Expectancy by Country in {year}",
         labels={
             "lifeExp": "Life Expectancy",
             "gdpPercap": "GDP per Capita",
@@ -132,24 +78,14 @@ with tab1:
         }
     )
 
-    fig_map.update_layout(
-        height=650,
-        margin=dict(l=0, r=0, t=50, b=0)
-    )
-
-    st.plotly_chart(fig_map, use_container_width=True)
+    fig_life_map.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
+    st.plotly_chart(fig_life_map, use_container_width=True)
 
     st.info(
-        "This map helps identify broad global inequalities in health and economic development. "
-        "Darker areas indicate higher values for the selected variable."
+        "This map highlights global differences in life expectancy, helping identify regions with poorer health outcomes."
     )
 
-    st.markdown("---")
-
-    # -----------------------------
-    # Health inequality hotspot map
-    # -----------------------------
-    st.subheader("Health Inequality Hotspot Map")
+    st.subheader("Health Inequality Hotspots")
 
     def classify_health_hotspot(life_exp):
         if life_exp < 60:
@@ -159,12 +95,10 @@ with tab1:
         else:
             return "Lower priority: life expectancy 70+"
 
-    filtered_df["Health Hotspot Category"] = filtered_df["lifeExp"].apply(
-        classify_health_hotspot
-    )
+    health_df["Health Hotspot Category"] = health_df["lifeExp"].apply(classify_health_hotspot)
 
     fig_hotspot = px.choropleth(
-        filtered_df,
+        health_df,
         locations="iso_alpha",
         color="Health Hotspot Category",
         hover_name="country",
@@ -183,42 +117,208 @@ with tab1:
                 "Moderate priority: life expectancy 60–69",
                 "Lower priority: life expectancy 70+"
             ]
+        }
+    )
+
+    fig_hotspot.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
+    st.plotly_chart(fig_hotspot, use_container_width=True)
+
+
+# ============================================================
+# TAB 2: ECONOMIC INEQUALITY
+# ============================================================
+with tab2:
+
+    st.header("2. Are economic inequalities visible in the same places?")
+
+    year = st.select_slider(
+        "Select year",
+        options=sorted(df["year"].unique()),
+        value=2007,
+        key="economic_year"
+    )
+
+    econ_df = df[df["year"] == year].copy()
+
+    fig_gdp_map = px.choropleth(
+        econ_df,
+        locations="iso_alpha",
+        color="gdpPercap",
+        hover_name="country",
+        hover_data={
+            "lifeExp": ":.1f",
+            "gdpPercap": ":,.0f",
+            "pop": ":,",
+            "continent": True,
+            "iso_alpha": False
         },
+        color_continuous_scale="Viridis",
+        title=f"Global GDP per Capita by Country in {year}",
         labels={
-            "lifeExp": "Life Expectancy",
             "gdpPercap": "GDP per Capita",
+            "lifeExp": "Life Expectancy",
             "pop": "Population"
         }
     )
 
-    fig_hotspot.update_layout(
-        height=650,
-        margin=dict(l=0, r=0, t=50, b=0)
-    )
-
-    st.plotly_chart(fig_hotspot, use_container_width=True)
+    fig_gdp_map.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
+    st.plotly_chart(fig_gdp_map, use_container_width=True)
 
     st.info(
-        "Countries with life expectancy below 60 are classified as high priority. "
-        "This gives a simple way to highlight health inequality hotspots."
+        "This map allows economic inequality to be compared with the life expectancy patterns shown in the previous tab."
     )
 
 
 # ============================================================
-# TAB 2: TRENDS OVER TIME
+# TAB 3: WEALTH AND HEALTH RELATIONSHIP
 # ============================================================
-with tab2:
+with tab3:
 
-    st.header("Trends Over Time")
+    st.header("3. Is there a relationship between wealth and health?")
 
-    st.write(
-        "This section explores how GDP per capita and life expectancy have changed over time."
+    relationship_year = st.select_slider(
+        "Select year",
+        options=sorted(df["year"].unique()),
+        value=2007,
+        key="relationship_year"
     )
 
-    # -----------------------------
-    # Animated scatter plot
-    # -----------------------------
-    st.subheader("GDP per Capita and Life Expectancy Over Time")
+    rel_df = df[df["year"] == relationship_year].copy()
+
+    fig_scatter = px.scatter(
+        rel_df,
+        x="gdpPercap",
+        y="lifeExp",
+        size="pop",
+        color="continent",
+        hover_name="country",
+        log_x=True,
+        size_max=120,
+        trendline="ols",
+        trendline_scope="overall",
+        title=f"GDP per Capita vs Life Expectancy in {relationship_year}",
+        labels={
+            "gdpPercap": "GDP per Capita",
+            "lifeExp": "Life Expectancy",
+            "pop": "Population",
+            "continent": "Continent"
+        }
+    )
+
+    fig_scatter.update_xaxes(
+        type="log",
+        tickvals=[1000, 5000, 10000, 50000, 100000],
+        ticktext=["1k", "5k", "10k", "50k", "100k"],
+        title="GDP per Capita (log scale)"
+    )
+
+    fig_scatter.update_yaxes(title="Life Expectancy")
+    fig_scatter.update_traces(opacity=0.7, marker=dict(sizemin=6))
+    fig_scatter.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
+
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
+    correlation = rel_df["gdpPercap"].corr(rel_df["lifeExp"])
+
+    st.metric(
+        "Correlation between GDP per capita and life expectancy",
+        f"{correlation:.2f}"
+    )
+
+    st.info(
+        "The scatter plot and correlation value show whether higher GDP per capita is associated with higher life expectancy."
+    )
+
+
+# ============================================================
+# TAB 4: REGIONAL AND COUNTRY DIFFERENCES
+# ============================================================
+with tab4:
+
+    st.header("4. Is the relationship the same across regions and countries?")
+
+    region_year = st.select_slider(
+        "Select year",
+        options=sorted(df["year"].unique()),
+        value=2007,
+        key="region_year"
+    )
+
+    region_df = df[df["year"] == region_year].copy()
+    region_df["log_gdpPercap"] = np.log(region_df["gdpPercap"])
+
+    st.subheader("Regional Differences")
+
+    fig_box_life = px.box(
+        region_df,
+        x="continent",
+        y="lifeExp",
+        color="continent",
+        title=f"Life Expectancy by Continent in {region_year}",
+        labels={"lifeExp": "Life Expectancy", "continent": "Continent"}
+    )
+
+    fig_box_life.update_layout(height=500, showlegend=False)
+    st.plotly_chart(fig_box_life, use_container_width=True)
+
+    fig_box_gdp = px.box(
+        region_df,
+        x="continent",
+        y="log_gdpPercap",
+        color="continent",
+        title=f"Log GDP per Capita by Continent in {region_year}",
+        labels={"log_gdpPercap": "Log GDP per Capita", "continent": "Continent"}
+    )
+
+    fig_box_gdp.update_layout(height=500, showlegend=False)
+    st.plotly_chart(fig_box_gdp, use_container_width=True)
+
+    st.subheader("Country-Level Rankings")
+
+    ranking_variable = st.selectbox(
+        "Select ranking variable",
+        ["lifeExp", "gdpPercap", "pop"],
+        key="ranking_variable_story"
+    )
+
+    top_10 = region_df.nlargest(10, ranking_variable)
+    bottom_10 = region_df.nsmallest(10, ranking_variable)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig_top = px.bar(
+            top_10.sort_values(ranking_variable),
+            x=ranking_variable,
+            y="country",
+            orientation="h",
+            title=f"Top 10 Countries by {ranking_variable} in {region_year}",
+            hover_data=["continent", "lifeExp", "gdpPercap", "pop"]
+        )
+        fig_top.update_layout(height=500)
+        st.plotly_chart(fig_top, use_container_width=True)
+
+    with col2:
+        fig_bottom = px.bar(
+            bottom_10.sort_values(ranking_variable, ascending=False),
+            x=ranking_variable,
+            y="country",
+            orientation="h",
+            title=f"Bottom 10 Countries by {ranking_variable} in {region_year}",
+            hover_data=["continent", "lifeExp", "gdpPercap", "pop"]
+        )
+        fig_bottom.update_layout(height=500)
+        st.plotly_chart(fig_bottom, use_container_width=True)
+
+
+# ============================================================
+# TAB 5: CHANGE OVER TIME
+# ============================================================
+with tab5:
+
+    st.header("5. How have these patterns changed over time?")
+
+    st.subheader("Animated Scatter Plot")
 
     fig_anim = px.scatter(
         df,
@@ -228,9 +328,9 @@ with tab2:
         color="continent",
         hover_name="country",
         log_x=True,
-        size_max=60,
         animation_frame="year",
         animation_group="country",
+        size_max=120,
         title="GDP per Capita vs Life Expectancy Over Time",
         labels={
             "gdpPercap": "GDP per Capita",
@@ -240,342 +340,102 @@ with tab2:
         }
     )
 
+    fig_anim.update_traces(marker=dict(sizemin=6), opacity=0.7)
     fig_anim.update_yaxes(range=[20, 90])
-
-    fig_anim.update_layout(
-        height=650,
-        margin=dict(l=0, r=0, t=50, b=0)
-    )
+    fig_anim.update_layout(height=650, margin=dict(l=0, r=0, t=50, b=0))
 
     st.plotly_chart(fig_anim, use_container_width=True)
 
-    st.info(
-        "This animated chart shows how countries have generally moved towards higher GDP per capita "
-        "and higher life expectancy over time."
-    )
+    st.subheader("Average Life Expectancy by Continent Over Time")
 
-    st.markdown("---")
+    life_heatmap_df = df.groupby(["continent", "year"])["lifeExp"].mean().reset_index()
 
-    # -----------------------------
-    # Correlation section
-    # -----------------------------
-    st.subheader("Relationship Between Wealth and Health")
-
-    correlation_year = st.select_slider(
-        "Select year for correlation analysis",
-        options=sorted(df["year"].unique()),
-        value=2007,
-        key="correlation_year"
-    )
-
-    corr_df = df[df["year"] == correlation_year].copy()
-
-    fig_corr = px.scatter(
-        corr_df,
-        x="gdpPercap",
-        y="lifeExp",
-        size="pop",
-        color="continent",
-        hover_name="country",
-        log_x=True,
-        size_max=55,
-        title=f"GDP per Capita vs Life Expectancy in {correlation_year}",
-        labels={
-            "gdpPercap": "GDP per Capita",
-            "lifeExp": "Life Expectancy",
-            "pop": "Population",
-            "continent": "Continent"
-        }
-    )
-
-    fig_corr.update_layout(
-        height=600,
-        margin=dict(l=0, r=0, t=50, b=0)
-    )
-
-    st.plotly_chart(fig_corr, use_container_width=True)
-
-    correlation = corr_df["gdpPercap"].corr(corr_df["lifeExp"])
-
-    st.metric(
-        "Correlation between GDP per capita and life expectancy",
-        f"{correlation:.2f}"
-    )
-
-    st.info(
-        "A positive correlation suggests that countries with higher GDP per capita often have higher life expectancy. "
-        "However, the relationship is not perfect because health outcomes are also affected by healthcare systems, inequality, conflict, policy and other social factors."
-    )
-
-    st.markdown("---")
-
-    # -----------------------------
-    # Heatmap
-    # -----------------------------
-    st.subheader("Average Life Expectancy by Continent")
-
-    heatmap_df = df.groupby(["continent", "year"])["lifeExp"].mean().reset_index()
-
-    fig_heatmap = px.imshow(
-        heatmap_df.pivot(
-            index="continent",
-            columns="year",
-            values="lifeExp"
-        ),
-        labels=dict(
-            x="Year",
-            y="Continent",
-            color="Life Expectancy"
-        ),
+    fig_life_heatmap = px.imshow(
+        life_heatmap_df.pivot(index="continent", columns="year", values="lifeExp"),
+        labels=dict(x="Year", y="Continent", color="Life Expectancy"),
         title="Average Life Expectancy by Continent Over Time",
         aspect="auto",
-        color_continuous_scale="Viridis"
+        color_continuous_scale="Viridis",
+        text_auto=True
     )
 
-    fig_heatmap.update_layout(
-        height=500,
-        margin=dict(l=0, r=0, t=50, b=0)
-    )
+    fig_life_heatmap.update_layout(height=500)
+    st.plotly_chart(fig_life_heatmap, use_container_width=True)
 
-    st.plotly_chart(fig_heatmap, use_container_width=True)
+    st.subheader("Country Trends")
 
-    st.markdown("---")
-
-    # -----------------------------
-    # Country trend section
-    # -----------------------------
-    st.subheader("Country Trend Over Time")
-
-    selected_trend_country = st.selectbox(
-        "Select a country to view its trend",
+    selected_country = st.selectbox(
+        "Select country to view trend",
         sorted(df["country"].unique()),
-        key="trend_country"
+        key="country_trend_story"
     )
 
-    country_df = df[df["country"] == selected_trend_country]
+    country_df = df[df["country"] == selected_country].copy()
 
     col1, col2 = st.columns(2)
 
     with col1:
-        fig_life = px.line(
+        fig_life_trend = px.line(
             country_df,
             x="year",
             y="lifeExp",
             markers=True,
-            title=f"Life Expectancy Over Time: {selected_trend_country}",
-            labels={
-                "lifeExp": "Life Expectancy",
-                "year": "Year"
-            }
+            title=f"Life Expectancy Over Time: {selected_country}",
+            labels={"lifeExp": "Life Expectancy", "year": "Year"}
         )
-
-        fig_life.update_layout(height=450)
-        st.plotly_chart(fig_life, use_container_width=True)
+        st.plotly_chart(fig_life_trend, use_container_width=True)
 
     with col2:
-        fig_gdp = px.line(
+        fig_gdp_trend = px.line(
             country_df,
             x="year",
             y="gdpPercap",
             markers=True,
-            title=f"GDP per Capita Over Time: {selected_trend_country}",
-            labels={
-                "gdpPercap": "GDP per Capita",
-                "year": "Year"
-            }
+            title=f"GDP per Capita Over Time: {selected_country}",
+            labels={"gdpPercap": "GDP per Capita", "year": "Year"}
         )
-
-        fig_gdp.update_layout(height=450)
-        st.plotly_chart(fig_gdp, use_container_width=True)
+        st.plotly_chart(fig_gdp_trend, use_container_width=True)
 
 
 # ============================================================
-# TAB 3: PROJECTION
+# TAB 6: EXPLORE AND EXPORT
 # ============================================================
-with tab3:
+with tab6:
 
-    st.header("Projected Life Expectancy")
+    st.header("6. Explore and Export Data")
 
     st.write(
-        "This section uses a simple linear trend based on historical life expectancy data. "
-        "The projection is illustrative only and should not be interpreted as a precise forecast."
+        "Use this section to explore the dataset directly and export selected rankings."
     )
 
-    selected_projection_country = st.selectbox(
-        "Select country for projection",
-        sorted(df["country"].unique()),
-        key="projection_country"
+    export_year = st.select_slider(
+        "Select year",
+        options=sorted(df["year"].unique()),
+        value=2007,
+        key="export_year"
     )
 
-    projection_df = df[df["country"] == selected_projection_country]
-
-    x = projection_df["year"]
-    y = projection_df["lifeExp"]
-
-    coeffs = np.polyfit(x, y, 1)
-    trend = np.poly1d(coeffs)
-
-    future_years = np.arange(x.min(), 2031, 1)
-    future_life = trend(future_years)
-
-    fig_pred = px.line(
-        x=future_years,
-        y=future_life,
-        title=f"Projected Life Expectancy Trend: {selected_projection_country}",
-        labels={
-            "x": "Year",
-            "y": "Life Expectancy"
-        }
+    export_variable = st.selectbox(
+        "Select variable",
+        ["lifeExp", "gdpPercap", "pop"],
+        key="export_variable"
     )
 
-    fig_pred.add_scatter(
-        x=x,
-        y=y,
-        mode="markers",
-        name="Actual Data"
-    )
+    export_df = df[df["year"] == export_year].copy()
 
-    fig_pred.update_layout(
-        height=650,
-        margin=dict(l=0, r=0, t=50, b=0)
-    )
-
-    st.plotly_chart(fig_pred, use_container_width=True)
-
-    projected_2030 = trend(2030)
-
-    st.metric(
-        label=f"Projected life expectancy in 2030 for {selected_projection_country}",
-        value=f"{projected_2030:.1f} years"
-    )
-
-    st.caption(
-        "This projection uses a simple linear model. It does not account for unexpected events, "
-        "policy changes, conflict, pandemics, healthcare improvements or economic shocks."
-    )
-
-
-# ============================================================
-# TAB 4: COUNTRY RANKINGS
-# ============================================================
-with tab4:
-
-    st.header("Country Rankings")
-
-    st.write(
-        "This section ranks countries by life expectancy, GDP per capita or population. "
-        "Use the year slider to see how the rankings change over time."
-    )
-
-    # -----------------------------
-    # Ranking controls
-    # -----------------------------
-    col1, col2 = st.columns(2)
-
-    with col1:
-        ranking_year = st.select_slider(
-            "Select year for ranking",
-            options=sorted(df["year"].unique()),
-            value=2007,
-            key="ranking_year"
-        )
-
-    with col2:
-        ranking_variable = st.selectbox(
-            "Select variable for ranking",
-            ["lifeExp", "gdpPercap", "pop"],
-            key="ranking_variable"
-        )
-
-    ranking_df = df[df["year"] == ranking_year].copy()
-
-    top_10 = ranking_df.nlargest(10, ranking_variable)
-    bottom_10 = ranking_df.nsmallest(10, ranking_variable)
-
-    # -----------------------------
-    # Top and bottom 10 charts
-    # -----------------------------
-    col1, col2 = st.columns(2)
-
-    with col1:
-        fig_top = px.bar(
-            top_10.sort_values(ranking_variable),
-            x=ranking_variable,
-            y="country",
-            orientation="h",
-            title=f"Top 10 Countries by {ranking_variable} in {ranking_year}",
-            hover_data={
-                "lifeExp": ":.1f",
-                "gdpPercap": ":,.0f",
-                "pop": ":,",
-                "continent": True
-            },
-            labels={
-                "country": "Country",
-                "lifeExp": "Life Expectancy",
-                "gdpPercap": "GDP per Capita",
-                "pop": "Population"
-            }
-        )
-
-        fig_top.update_layout(height=550)
-        st.plotly_chart(fig_top, use_container_width=True)
-
-    with col2:
-        fig_bottom = px.bar(
-            bottom_10.sort_values(ranking_variable, ascending=False),
-            x=ranking_variable,
-            y="country",
-            orientation="h",
-            title=f"Bottom 10 Countries by {ranking_variable} in {ranking_year}",
-            hover_data={
-                "lifeExp": ":.1f",
-                "gdpPercap": ":,.0f",
-                "pop": ":,",
-                "continent": True
-            },
-            labels={
-                "country": "Country",
-                "lifeExp": "Life Expectancy",
-                "gdpPercap": "GDP per Capita",
-                "pop": "Population"
-            }
-        )
-
-        fig_bottom.update_layout(height=550)
-        st.plotly_chart(fig_bottom, use_container_width=True)
-
-    st.info(
-        "The ranking charts allow quick comparison of countries at the top and bottom of the selected measure. "
-        "Moving the year slider shows how rankings change across the dataset."
-    )
-
-    st.markdown("---")
-
-    # -----------------------------
-    # Full ranking table
-    # -----------------------------
-    st.subheader("Full Ranking Table")
-
-    ranking_table = ranking_df.sort_values(
-        ranking_variable,
+    ranking_table = export_df.sort_values(
+        export_variable,
         ascending=False
     )[["country", "continent", "year", "lifeExp", "gdpPercap", "pop"]]
 
     ranking_table = ranking_table.reset_index(drop=True)
     ranking_table.index = ranking_table.index + 1
 
-    st.dataframe(
-        ranking_table,
-        use_container_width=True
-    )
+    st.dataframe(ranking_table, use_container_width=True)
 
-    # -----------------------------
-    # Download button
-    # -----------------------------
     st.download_button(
         label="Download ranking table as CSV",
         data=ranking_table.to_csv(index=True),
-        file_name=f"country_rankings_{ranking_variable}_{ranking_year}.csv",
+        file_name=f"country_rankings_{export_variable}_{export_year}.csv",
         mime="text/csv"
     )
