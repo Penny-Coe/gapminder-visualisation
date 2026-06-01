@@ -1,6 +1,3 @@
-# gapminder-visualisation
-Dashboard creation for global health stats
-
 # Gapminder Visualisation Dashboard
 This project explores global health and wealth inequalities using the Gapminder dataset. It investigates the relationship between GDP per capita, life expectancy, population size, continent and time using interactive data visualisation techniques.
 
@@ -52,3 +49,34 @@ Clone this repository:
 ```bash
 git clone https://github.com/Penny-Coe/gapminder-visualisation.git
 cd gapminder-visualisation
+```
+
+### Install the required packages:
+
+```bash
+pip install pandas numpy plotly streamlit
+```
+
+### Run the dashboard:
+
+```bash
+streamlit run app.py
+```
+
+## File Structure
+
+```text
+gapminder-visualisation/
+│
+├── app.py              # Streamlit dashboard
+├── README.md           # Project instructions
+└── notebook.html       # Static export of Google Colab notebook, if included
+## Reproducibility
+```
+
+The dataset is loaded directly from Plotly, so no separate data download is required. The Google Colab notebook contains the full executed code and output results. The Streamlit dashboard provides an interactive version of the main visualisations.
+
+## Author
+
+Penny Coe
+DSC6002M Data Visualisation
