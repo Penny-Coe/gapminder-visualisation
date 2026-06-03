@@ -37,7 +37,7 @@ The project includes:
 
 ## How to Run the Project
 
-### Option 1: Google Colab and below. Run the cells from top to bottom. The notebook contains the full data loading, preprocessing, visualisation code and output results.
+### Option 1: Open Google Colab using link from the report or below. Run the cells from top to bottom. The notebook contains the full data loading, preprocessing, visualisation code and output results.
 https://colab.research.google.com/drive/1YOQ6Z9rLcg7TZl1LBVRGw63IzWdq6WuF
 
 ### Option 2: Streamlit Dashboard
