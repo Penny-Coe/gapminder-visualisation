@@ -37,11 +37,13 @@ The project includes:
 
 ## How to Run the Project
 
-### Option 1: Google Colab
-Open the submitted Google Colab notebook and run the cells in order from top to bottom. The notebook includes the data loading, preprocessing, visualisation code and outputs.
+### Option 1: Google Colab and below. Run the cells from top to bottom. The notebook contains the full data loading, preprocessing, visualisation code and output results.
+## https://colab.research.google.com/drive/1YOQ6Z9rLcg7TZl1LBVRGw63IzWdq6WuF
 
 ### Option 2: Streamlit Dashboard
-The interactive dashboard can be accessed using the Streamlit link provided in the report.
+The interactive dashboard can be accessed using the Streamlit link provided in the report (also below).
+https://gapminder-visualisation-2026.streamlit.app/
+##
 
 ### Option 3: Run Locally
 Clone this repository:
@@ -68,13 +70,15 @@ streamlit run app.py
 ```text
 gapminder-visualisation/
 │
-├── app.py              # Streamlit dashboard
-├── README.md           # Project instructions
-└── notebook.html       # Static export of Google Colab notebook, if included
-## Reproducibility
+├── app.py
+├── README.md
+├── notebooks/
+│   └── gapminder_analysis.ipynb
 ```
 
-The dataset is loaded directly from Plotly, so no separate data download is required. The Google Colab notebook contains the full executed code and output results. The Streamlit dashboard provides an interactive version of the main visualisations.
+## Reproducibility
+
+The Google Colab notebook included in this repository contains the full executed code, preprocessing steps, visualisation generation and output results. The Streamlit dashboard provides an interactive version of the main visualisations presented in the report.
 
 ## Author
 
