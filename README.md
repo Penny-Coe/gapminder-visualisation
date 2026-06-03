@@ -37,15 +37,15 @@ The project includes:
 
 ## How to Run the Project
 
-# Option 1: Open Google Colab using link from the report or below. Run the cells from top to bottom. The notebook contains the full data loading, preprocessing, visualisation code and output results.
+#### Option 1: Open Google Colab using link from the report or below. Run the cells from top to bottom. The notebook contains the full data loading, preprocessing, visualisation code and output results.
 https://colab.research.google.com/drive/1YOQ6Z9rLcg7TZl1LBVRGw63IzWdq6WuF
 
-# Option 2: Streamlit Dashboard
+#### Option 2: Streamlit Dashboard
 The interactive dashboard can be accessed using the Streamlit link provided in the report (also below).
 https://gapminder-visualisation-2026.streamlit.app/
 ##
 
-# Option 3: Run Locally
+#### Option 3: Run Locally
 Clone this repository:
 
 ```bash
