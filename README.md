@@ -43,7 +43,6 @@ https://colab.research.google.com/drive/1YOQ6Z9rLcg7TZl1LBVRGw63IzWdq6WuF
 #### Option 2: Streamlit Dashboard
 The interactive dashboard can be accessed using the Streamlit link provided in the report (also below).
 https://gapminder-visualisation-2026.streamlit.app/
-##
 
 #### Option 3: Run Locally
 Clone this repository:
