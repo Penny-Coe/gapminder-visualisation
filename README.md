@@ -65,15 +65,14 @@ pip install pandas numpy plotly streamlit
 streamlit run app.py
 ```
 
-## File Structure
-
 ```text
 gapminder-visualisation/
 │
-├── app.py
-├── README.md
-├── notebooks/
-│   └── gapminder_analysis.ipynb
+├── app.py                 # Streamlit dashboard
+├── README.md              # Project documentation
+├── requirements.txt       # Package dependencies
+└── notebooks/
+    └── gapminder_analysis.ipynb
 ```
 
 ## Reproducibility
